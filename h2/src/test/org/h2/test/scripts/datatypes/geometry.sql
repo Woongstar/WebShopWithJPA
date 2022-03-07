@@ -1,4 +1,4 @@
--- Copyright 2004-2021 H2 Group. Multiple-Licensed under the MPL 2.0,
+-- Copyright 2004-2022 H2 Group. Multiple-Licensed under the MPL 2.0,
 -- and the EPL 1.0 (https://h2database.com/html/license.html).
 -- Initial Developer: H2 Group
 --
@@ -272,3 +272,6 @@ SELECT CAST(GEOMETRY 'POLYGON EMPTY' AS VARBINARY);
 
 SELECT CAST(GEOMETRY X'00000000030000000100000000' AS VARBINARY);
 >> X'000000000300000000'
+
+VALUES GEOMETRY 'POINT (1 2 3)';
+> exception DATA_CONVERSION_ERROR_1

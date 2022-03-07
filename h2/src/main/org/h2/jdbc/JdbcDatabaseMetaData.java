@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2021 H2 Group. Multiple-Licensed under the MPL 2.0,
+ * Copyright 2004-2022 H2 Group. Multiple-Licensed under the MPL 2.0,
  * and the EPL 1.0 (https://h2database.com/html/license.html).
  * Initial Developer: H2 Group
  */
@@ -1007,9 +1007,13 @@ public final class JdbcDatabaseMetaData extends TraceObject
 
     /**
      * Gets the comma-separated list of all SQL keywords that are not supported
-     * as unquoted table/column/index name, in addition to the SQL:2003 keywords.
+     * as unquoted identifiers, in addition to the SQL:2003 reserved words.
+     * <p>
+     * List of keywords in H2 may depend on compatibility mode and other
+     * settings.
+     * </p>
      *
-     * @return a list of additional the keywords
+     * @return a list of additional keywords
      */
     @Override
     public String getSQLKeywords() throws SQLException {

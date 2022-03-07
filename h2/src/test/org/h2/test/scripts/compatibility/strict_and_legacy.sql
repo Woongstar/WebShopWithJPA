@@ -1,4 +1,4 @@
--- Copyright 2004-2021 H2 Group. Multiple-Licensed under the MPL 2.0,
+-- Copyright 2004-2022 H2 Group. Multiple-Licensed under the MPL 2.0,
 -- and the EPL 1.0 (https://h2database.com/html/license.html).
 -- Initial Developer: H2 Group
 --
@@ -87,6 +87,15 @@ DROP SEQUENCE SEQ;
 
 SELECT 1 = TRUE;
 >> TRUE
+
+SET MODE STRICT;
+> ok
+
+CREATE TABLE TEST(LIMIT INTEGER, MINUS INTEGER);
+> ok
+
+DROP TABLE TEST;
+> ok
 
 SET MODE REGULAR;
 > ok

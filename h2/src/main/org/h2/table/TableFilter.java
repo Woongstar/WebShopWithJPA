@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2021 H2 Group. Multiple-Licensed under the MPL 2.0,
+ * Copyright 2004-2022 H2 Group. Multiple-Licensed under the MPL 2.0,
  * and the EPL 1.0 (https://h2database.com/html/license.html).
  * Initial Developer: H2 Group
  */
@@ -194,7 +194,7 @@ public class TableFilter implements ColumnResolver {
      * @param s the session
      */
     public void lock(SessionLocal s) {
-        table.lock(s, false, false);
+        table.lock(s, Table.READ_LOCK);
         if (join != null) {
             join.lock(s);
         }

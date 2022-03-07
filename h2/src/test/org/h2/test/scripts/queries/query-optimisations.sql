@@ -1,4 +1,4 @@
--- Copyright 2004-2021 H2 Group. Multiple-Licensed under the MPL 2.0,
+-- Copyright 2004-2022 H2 Group. Multiple-Licensed under the MPL 2.0,
 -- and the EPL 1.0 (https://h2database.com/html/license.html).
 -- Initial Developer: H2 Group
 --
@@ -174,4 +174,37 @@ SET TIME ZONE LOCAL;
 > ok
 
 DROP TABLE A, B;
+> ok
+
+CREATE TABLE TEST(T TIMESTAMP WITH TIME ZONE) AS VALUES
+    NULL,
+    TIMESTAMP WITH TIME ZONE '2020-01-01 00:00:00+00',
+    TIMESTAMP WITH TIME ZONE '2020-01-01 01:00:00+01',
+    TIMESTAMP WITH TIME ZONE '2020-01-01 02:00:00+01',
+    NULL;
+> ok
+
+SELECT T AT TIME ZONE 'UTC' FROM TEST GROUP BY T;
+> T AT TIME ZONE 'UTC'
+> ----------------------
+> 2020-01-01 00:00:00+00
+> 2020-01-01 01:00:00+00
+> null
+> rows: 3
+
+CREATE INDEX TEST_T_IDX ON TEST(T);
+> ok
+
+SELECT T AT TIME ZONE 'UTC' FROM TEST GROUP BY T;
+> T AT TIME ZONE 'UTC'
+> ----------------------
+> 2020-01-01 00:00:00+00
+> 2020-01-01 01:00:00+00
+> null
+> rows: 3
+
+EXPLAIN SELECT T AT TIME ZONE 'UTC' FROM TEST GROUP BY T;
+>> SELECT "T" AT TIME ZONE 'UTC' FROM "PUBLIC"."TEST" /* PUBLIC.TEST_T_IDX */ GROUP BY "T" /* group sorted */
+
+DROP TABLE TEST;
 > ok

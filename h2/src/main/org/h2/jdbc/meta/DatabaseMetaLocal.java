@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2021 H2 Group. Multiple-Licensed under the MPL 2.0,
+ * Copyright 2004-2022 H2 Group. Multiple-Licensed under the MPL 2.0,
  * and the EPL 1.0 (https://h2database.com/html/license.html).
  * Initial Developer: H2 Group
  */
@@ -21,6 +21,7 @@ import org.h2.constraint.ConstraintReferential;
 import org.h2.constraint.ConstraintUnique;
 import org.h2.engine.Database;
 import org.h2.engine.DbObject;
+import org.h2.engine.Mode;
 import org.h2.engine.Right;
 import org.h2.engine.SessionLocal;
 import org.h2.engine.User;
@@ -105,8 +106,6 @@ public final class DatabaseMetaLocal extends DatabaseMetaLocalBase {
     private static final ValueSmallint PROCEDURE_RETURNS_RESULT = ValueSmallint
             .get((short) DatabaseMetaData.procedureReturnsResult);
 
-    private static final ValueSmallint TABLE_INDEX_STATISTIC = ValueSmallint.get(DatabaseMetaData.tableIndexStatistic);
-
     private static final ValueSmallint TABLE_INDEX_HASHED = ValueSmallint.get(DatabaseMetaData.tableIndexHashed);
 
     private static final ValueSmallint TABLE_INDEX_OTHER = ValueSmallint.get(DatabaseMetaData.tableIndexOther);
@@ -134,18 +133,28 @@ public final class DatabaseMetaLocal extends DatabaseMetaLocalBase {
 
     @Override
     public String getSQLKeywords() {
-        return "CURRENT_CATALOG," //
-                + "CURRENT_SCHEMA," //
-                + "GROUPS," //
-                + "IF,ILIKE,INTERSECTS," //
-                + "KEY," //
-                + "LIMIT," //
-                + "MINUS," //
-                + "OFFSET," //
-                + "QUALIFY," //
-                + "REGEXP,ROWNUM," //
-                + "TOP,"//
-                + "_ROWID_";
+        StringBuilder builder = new StringBuilder(103).append( //
+                "CURRENT_CATALOG," //
+                        + "CURRENT_SCHEMA," //
+                        + "GROUPS," //
+                        + "IF,ILIKE," //
+                        + "KEY,");
+        Mode mode = session.getMode();
+        if (mode.limit) {
+            builder.append("LIMIT,");
+        }
+        if (mode.minusIsExcept) {
+            builder.append("MINUS,");
+        }
+        builder.append( //
+                "OFFSET," //
+                        + "QUALIFY," //
+                        + "REGEXP,ROWNUM,");
+        if (mode.topInSelect || mode.topInDML) {
+            builder.append("TOP,");
+        }
+        return builder.append("_ROWID_") //
+                .toString();
     }
 
     @Override
@@ -1258,15 +1267,7 @@ public final class DatabaseMetaLocal extends DatabaseMetaLocalBase {
                 Value tableValue = getString(table.getName());
                 Value indexValue = getString(index.getName());
                 IndexColumn[] cols = index.getIndexColumns();
-                ValueSmallint type = TABLE_INDEX_STATISTIC;
-                type: if (uniqueColumnCount == cols.length) {
-                    for (IndexColumn c : cols) {
-                        if (c.column.isNullable()) {
-                            break type;
-                        }
-                    }
-                    type = index.getIndexType().isHash() ? TABLE_INDEX_HASHED : TABLE_INDEX_OTHER;
-                }
+                ValueSmallint type = index.getIndexType().isHash() ? TABLE_INDEX_HASHED : TABLE_INDEX_OTHER;
                 for (int i = 0, l = cols.length; i < l; i++) {
                     IndexColumn c = cols[i];
                     boolean nonUnique = i >= uniqueColumnCount;

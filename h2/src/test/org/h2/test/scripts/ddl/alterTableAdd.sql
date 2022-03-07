@@ -1,4 +1,4 @@
--- Copyright 2004-2021 H2 Group. Multiple-Licensed under the MPL 2.0,
+-- Copyright 2004-2022 H2 Group. Multiple-Licensed under the MPL 2.0,
 -- and the EPL 1.0 (https://h2database.com/html/license.html).
 -- Initial Developer: H2 Group
 --
@@ -333,6 +333,63 @@ SELECT INDEX_TYPE_NAME, IS_GENERATED FROM INFORMATION_SCHEMA.INDEXES WHERE TABLE
 > --------------- ------------
 > PRIMARY KEY     TRUE
 > rows: 1
+
+DROP TABLE TEST;
+> ok
+
+CREATE TABLE TEST(A INT, B INT, C INT INVISIBLE, CONSTRAINT TEST_UNIQUE_2 UNIQUE(VALUE));
+> ok
+
+ALTER TABLE TEST ADD COLUMN D INT;
+> ok
+
+ALTER TABLE TEST ADD CONSTRAINT TEST_UNIQUE_3 UNIQUE(VALUE);
+> ok
+
+SELECT CONSTRAINT_NAME, COLUMN_NAME, ORDINAL_POSITION FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+    WHERE TABLE_NAME = 'TEST';
+> CONSTRAINT_NAME COLUMN_NAME ORDINAL_POSITION
+> --------------- ----------- ----------------
+> TEST_UNIQUE_2   A           1
+> TEST_UNIQUE_2   B           2
+> TEST_UNIQUE_3   A           1
+> TEST_UNIQUE_3   B           2
+> TEST_UNIQUE_3   D           3
+> rows: 5
+
+DROP TABLE TEST;
+> ok
+
+CREATE TABLE TEST();
+> ok
+
+ALTER TABLE TEST ADD UNIQUE (VALUE);
+> exception SYNTAX_ERROR_1
+
+DROP TABLE TEST;
+> ok
+
+CREATE TABLE TEST(A INT, B INT) AS VALUES (3, 4);
+> ok
+
+ALTER TABLE TEST ADD G INT GENERATED ALWAYS AS (A + B);
+> ok
+
+ALTER TABLE TEST ADD ID BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY FIRST;
+> ok
+
+ALTER TABLE TEST ADD C INT AFTER B;
+> ok
+
+INSERT INTO TEST(A, B) VALUES (5, 6);
+> update count: 1
+
+TABLE TEST;
+> ID A B C    G
+> -- - - ---- --
+> 1  3 4 null 7
+> 2  5 6 null 11
+> rows: 2
 
 DROP TABLE TEST;
 > ok

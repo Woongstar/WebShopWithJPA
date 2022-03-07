@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2021 H2 Group. Multiple-Licensed under the MPL 2.0,
+ * Copyright 2004-2022 H2 Group. Multiple-Licensed under the MPL 2.0,
  * and the EPL 1.0 (https://h2database.com/html/license.html).
  * Initial Developer: H2 Group
  */
@@ -2016,6 +2016,7 @@ public class MVStore implements AutoCloseable {
      * @param targetFillRate do nothing if the file store fill rate is higher
      *            than this
      * @param moveSize the number of bytes to move
+     * @return true if any chunks were moved as result of this operation, false otherwise
      */
     boolean compactMoveChunks(int targetFillRate, long moveSize) {
         boolean res = false;
@@ -2545,6 +2546,9 @@ public class MVStore implements AutoCloseable {
 
     /**
      * Read a page.
+     *
+     * @param <K> key type
+     * @param <V> value type
      *
      * @param map the map
      * @param pos the page position
@@ -3879,7 +3883,7 @@ public class MVStore implements AutoCloseable {
          * stops if the target fill rate is reached.
          * <p>
          * The default value is 90 (90%). The value 0 disables auto-compacting.
-         * <p>
+         * </p>
          *
          * @param percent the target fill rate
          * @return this

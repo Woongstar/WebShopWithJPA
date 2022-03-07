@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2021 H2 Group. Multiple-Licensed under the MPL 2.0,
+ * Copyright 2004-2022 H2 Group. Multiple-Licensed under the MPL 2.0,
  * and the EPL 1.0 (https://h2database.com/html/license.html).
  * Initial Developer: H2 Group
  */
@@ -399,6 +399,11 @@ public class Mode {
     public boolean limit;
 
     /**
+     * Whether MINUS can be used as EXCEPT.
+     */
+    public boolean minusIsExcept;
+
+    /**
      * Whether IDENTITY pseudo data type is supported.
      */
     public boolean identityDataType;
@@ -450,6 +455,7 @@ public class Mode {
         mode.dateTimeValueWithinTransaction = true;
         mode.topInSelect = true;
         mode.limit = true;
+        mode.minusIsExcept = true;
         mode.identityDataType = true;
         mode.serialDataTypes = true;
         mode.autoIncrementClause = true;
@@ -465,12 +471,14 @@ public class Mode {
         mode.dateTimeValueWithinTransaction = true;
         mode.topInSelect = true;
         mode.limit = true;
+        mode.minusIsExcept = true;
         mode.identityDataType = true;
         mode.serialDataTypes = true;
         mode.autoIncrementClause = true;
         // Legacy identity and sequence features
         mode.identityClause = true;
         mode.updateSequenceOnManualIdentityInsertion = true;
+        mode.takeInsertedIdentity = true;
         mode.identityColumnsHaveDefaultOnNull = true;
         mode.nextvalAndCurrvalPseudoColumns = true;
         // Legacy DML features
@@ -498,6 +506,7 @@ public class Mode {
         mode.expressionNames = ExpressionNames.NUMBER;
         mode.viewExpressionNames = ViewExpressionNames.EXCEPTION;
         mode.limit = true;
+        mode.minusIsExcept = true;
         mode.numericWithBooleanComparison = true;
         add(mode);
 
@@ -523,6 +532,7 @@ public class Mode {
         mode.expressionNames = ExpressionNames.C_NUMBER;
         mode.topInSelect = true;
         mode.limit = true;
+        mode.minusIsExcept = true;
         mode.numericWithBooleanComparison = true;
         add(mode);
 
@@ -632,6 +642,7 @@ public class Mode {
         mode.charAndByteLengthUnits = true;
         mode.nextvalAndCurrvalPseudoColumns = true;
         mode.mergeWhere = true;
+        mode.minusIsExcept = true;
         mode.expressionNames = ExpressionNames.ORIGINAL_SQL;
         mode.viewExpressionNames = ViewExpressionNames.EXCEPTION;
         mode.typeByNameMap.put("BINARY_FLOAT", DataType.getDataType(Value.REAL));

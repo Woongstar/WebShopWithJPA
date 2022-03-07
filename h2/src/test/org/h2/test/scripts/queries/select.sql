@@ -1,4 +1,4 @@
--- Copyright 2004-2021 H2 Group. Multiple-Licensed under the MPL 2.0,
+-- Copyright 2004-2022 H2 Group. Multiple-Licensed under the MPL 2.0,
 -- and the EPL 1.0 (https://h2database.com/html/license.html).
 -- Initial Developer: H2 Group
 --
@@ -1178,3 +1178,9 @@ SELECT X FROM SYSTEM_RANGE(1, 2) ORDER BY X DESC FETCH FIRST 0xFFFFFFFF ROWS ONL
 > 2
 > 1
 > rows (ordered): 2
+
+SELECT ((SELECT 1 X) EXCEPT (SELECT 1 Y)) T;
+> T
+> ----
+> null
+> rows: 1

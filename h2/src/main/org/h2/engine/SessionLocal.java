@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2021 H2 Group. Multiple-Licensed under the MPL 2.0,
+ * Copyright 2004-2022 H2 Group. Multiple-Licensed under the MPL 2.0,
  * and the EPL 1.0 (https://h2database.com/html/license.html).
  * Initial Developer: H2 Group
  */
@@ -185,7 +185,6 @@ public final class SessionLocal extends Session implements TransactionStore.Roll
     private int createViewLevel;
     private volatile SmallLRUCache<Object, ViewIndex> viewIndexCache;
     private HashMap<Object, ViewIndex> subQueryIndexCache;
-    private boolean forceJoinOrder;
     private boolean lazyQueryExecution;
 
     private BitSet nonKeywords;
@@ -276,14 +275,6 @@ public final class SessionLocal extends Session implements TransactionStore.Roll
 
     public boolean isLazyQueryExecution() {
         return lazyQueryExecution;
-    }
-
-    public void setForceJoinOrder(boolean forceJoinOrder) {
-        this.forceJoinOrder = forceJoinOrder;
-    }
-
-    public boolean isForceJoinOrder() {
-        return forceJoinOrder;
     }
 
     /**

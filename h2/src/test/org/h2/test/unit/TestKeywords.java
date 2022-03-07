@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2021 H2 Group. Multiple-Licensed under the MPL 2.0,
+ * Copyright 2004-2022 H2 Group. Multiple-Licensed under the MPL 2.0,
  * and the EPL 1.0 (https://h2database.com/html/license.html).
  * Initial Developer: H2 Group
  */
@@ -18,6 +18,8 @@ import java.util.Map.Entry;
 import java.util.TreeSet;
 
 import org.h2.command.Parser;
+import org.h2.command.Token;
+import org.h2.command.Tokenizer;
 import org.h2.message.DbException;
 import org.h2.test.TestBase;
 import org.h2.util.ParserUtil;
@@ -457,6 +459,8 @@ public class TestKeywords extends TestBase {
 
     });
 
+    private static final HashSet<String> STRICT_MODE_NON_KEYWORDS = toSet(new String[] { "LIMIT", "MINUS", "TOP" });
+
     private static final HashSet<String> ALL_RESEVED_WORDS;
 
     private static final HashMap<String, TokenType> TOKENS;
@@ -471,9 +475,17 @@ public class TestKeywords extends TestBase {
         set.addAll(SQL2016_RESERVED_WORDS);
         ALL_RESEVED_WORDS = set;
         HashMap<String, TokenType> tokens = new HashMap<>();
+        processClass(Parser.class, tokens);
+        processClass(ParserUtil.class, tokens);
+        processClass(Token.class, tokens);
+        processClass(Tokenizer.class, tokens);
+        TOKENS = tokens;
+    }
+
+    private static void processClass(Class<?> clazz, HashMap<String, TokenType> tokens) {
         ClassReader r;
         try {
-            r = new ClassReader(Parser.class.getResourceAsStream("Parser.class"));
+            r = new ClassReader(clazz.getResourceAsStream(clazz.getSimpleName() + ".class"));
         } catch (IOException e) {
             throw DbException.convert(e);
         }
@@ -512,7 +524,7 @@ public class TestKeywords extends TestBase {
                     }
                 }
                 final TokenType type;
-                switch (ParserUtil.getTokenType(s, false, 0, l, true)) {
+                switch (ParserUtil.getTokenType(s, false, true)) {
                 case ParserUtil.IDENTIFIER:
                     type = TokenType.IDENTIFIER;
                     break;
@@ -525,7 +537,6 @@ public class TestKeywords extends TestBase {
                 tokens.put(s, type);
             }
         }, ClassReader.SKIP_DEBUG | ClassReader.SKIP_FRAMES);
-        TOKENS = tokens;
     }
 
     private static HashSet<String> toSet(String[] array) {
@@ -556,11 +567,20 @@ public class TestKeywords extends TestBase {
     }
 
     private void testParser() throws Exception {
-        try (Connection conn = DriverManager.getConnection("jdbc:h2:mem:keywords")) {
+        testParser(false);
+        testParser(true);
+    }
+
+    private void testParser(boolean strictMode) throws Exception {
+        try (Connection conn = DriverManager
+                .getConnection("jdbc:h2:mem:keywords;MODE=" + (strictMode ? "STRICT" : "REGULAR"))) {
             Statement stat = conn.createStatement();
             for (Entry<String, TokenType> entry : TOKENS.entrySet()) {
                 String s = entry.getKey();
                 TokenType type = entry.getValue();
+                if (strictMode && STRICT_MODE_NON_KEYWORDS.contains(s)) {
+                    type = TokenType.IDENTIFIER;
+                }
                 Throwable exception1 = null, exception2 = null;
                 try {
                     stat.execute("CREATE TABLE " + s + '(' + s + " INT)");
@@ -704,6 +724,12 @@ public class TestKeywords extends TestBase {
         try (Connection conn = DriverManager.getConnection("jdbc:h2:mem:")) {
             assertEquals(setToString(set), conn.getMetaData().getSQLKeywords());
         }
+        try (Connection conn = DriverManager.getConnection("jdbc:h2:mem:;MODE=STRICT")) {
+            TreeSet<String> set2 = new TreeSet<>(set);
+            set2.removeAll(STRICT_MODE_NON_KEYWORDS);
+            assertEquals(setToString(set2), conn.getMetaData().getSQLKeywords());
+        }
+        set.add("INTERSECTS");
         set.add("SYSDATE");
         set.add("SYSTIME");
         set.add("SYSTIMESTAMP");

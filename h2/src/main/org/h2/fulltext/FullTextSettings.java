@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2021 H2 Group. Multiple-Licensed under the MPL 2.0,
+ * Copyright 2004-2022 H2 Group. Multiple-Licensed under the MPL 2.0,
  * and the EPL 1.0 (https://h2database.com/html/license.html).
  * Initial Developer: H2 Group
  */
@@ -123,7 +123,7 @@ final class FullTextSettings {
      * @param indexId the index id
      * @return the index info
      */
-    protected IndexInfo getIndexInfo(int indexId) {
+    IndexInfo getIndexInfo(int indexId) {
         return indexes.get(indexId);
     }
 
@@ -132,7 +132,7 @@ final class FullTextSettings {
      *
      * @param index the index
      */
-    protected void addIndexInfo(IndexInfo index) {
+    void addIndexInfo(IndexInfo index) {
         indexes.put(index.id, index);
     }
 
@@ -143,7 +143,7 @@ final class FullTextSettings {
      * @param word the word to convert and check
      * @return the uppercase version of the word or null
      */
-    protected String convertWord(String word) {
+    String convertWord(String word) {
         word = normalizeWord(word);
         synchronized (ignoreList) {
             if (ignoreList.contains(word)) {
@@ -158,8 +158,9 @@ final class FullTextSettings {
      *
      * @param conn the connection
      * @return the settings
+     * @throws SQLException on failure
      */
-    protected static FullTextSettings getInstance(Connection conn)
+    static FullTextSettings getInstance(Connection conn)
             throws SQLException {
         String path = getIndexPath(conn);
         FullTextSettings setting;
@@ -200,8 +201,9 @@ final class FullTextSettings {
      * @param conn the connection
      * @param sql the statement
      * @return the prepared statement
+     * @throws SQLException on failure
      */
-    protected synchronized PreparedStatement prepare(Connection conn, String sql)
+    synchronized PreparedStatement prepare(Connection conn, String sql)
             throws SQLException {
         SoftValuesHashMap<String, PreparedStatement> c = cache.get(conn);
         if (c == null) {
