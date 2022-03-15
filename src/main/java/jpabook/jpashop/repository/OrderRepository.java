@@ -1,5 +1,6 @@
 package jpabook.jpashop.repository;
 
+import jpabook.jpashop.domain.Member;
 import jpabook.jpashop.domain.Order;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -20,9 +21,8 @@ public class OrderRepository {
         return em.find(Order.class, id);
     }
 
-//    public List<Order> findAll(OrderSearch orderSearch){
-//        return em.createQuery("select o from Order o join o.member m")
-//                .setMaxResults(1000)
-//                .getResultList();
-//    }
+    public List<Order> findAll(OrderSearch orderSearch){
+        return em.createQuery("select m from Order m", Order.class)
+                .getResultList();
+    }
 }
